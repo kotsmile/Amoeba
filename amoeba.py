@@ -1,8 +1,10 @@
 import random
 import math
 import matplotlib.pyplot as plt
+from numpy import arange
 from mpl_toolkits.mplot3d import Axes3D
-from numpy import arange, array
+import sys
+import time
 
 
 # nosocheklubitchelovechka #nosokichelovek #lubov #podnosoktozhenosok
@@ -13,7 +15,7 @@ class Vector:
         self.y = y
 
     def __abs__(self):
-        return sqrt(self.x ** 2 + self.y ** 2)
+        return math.sqrt(self.x ** 2 + self.y ** 2)
 
     def __add__(self, other):
         return Vector(self.x + other.x, self.y + other.y)
@@ -34,10 +36,7 @@ class Vector:
 def func(v):
     x = v.x
     y = v.y
-    try:
-        return -math.sqrt(1 - (x - 1.5) ** 2 - (y - 1.5) ** 2) + 2
-    except ValueError:
-        return 2
+    return (x - 1.5) ** 2 + (y - 1.5) ** 2
 
 
 class Amoeba:
@@ -51,6 +50,7 @@ class Amoeba:
             Vector(random.uniform(x_range[0], x_range[1]), random.uniform(y_range[0], y_range[1])),
             Vector(random.uniform(x_range[0], x_range[1]), random.uniform(y_range[0], y_range[1]))
         ]
+        self.dev = self.vertexes[:]
 
         self.sort()
 
@@ -68,19 +68,26 @@ class Amoeba:
                 h = n_
             else:
                 h = n
-        elif f(n) > f(h_):
+        else:
             n__ = m - (m - h) * 0.5
             if f(n__) < f(h_):
                 h = n__
             else:
                 h = k + (h - k) * 0.5
                 h_ = k + (h_ - k) * 0.5
-        plot_2d(self.x_range, self.y_range, points=[h, h_, k])
+
         self.vertexes = [h, h_, k]
+        plot_2d(self.x_range, self.y_range, self.vertexes)
 
     def find_min(self):
+        it = 0
         while self.area() > self.eps:
             self.next()
+            it += 1
+            if it > 100:
+                print(self.dev)
+                return Vector(0, 0)
+
         return self.vertexes[-1]
 
     def sort(self):
@@ -129,8 +136,20 @@ def plot_3d(f, x_range, y_range, points=None):
 
 
 if __name__ == '__main__':
-    eps = 0.0001
+    eps = 0.00001
     am = Amoeba(func, [0, 2], [0, 2], eps=eps)
     minimum = am.find_min()
     print(minimum)
     plot_3d(func, [0, 2], [0, 2], points=[minimum])
+
+    # j = 0
+    # t = Vector(1.5, 1.5)
+    # for i in range(100):
+    #     print(f'#{i+1}...   ', end='\t')
+    #     sys.stdout.flush()
+    #     a = Amoeba(func, [0, 2], [0, 2], eps=0.0000001)
+    #     t1 = time.time()
+    #     mi = a.find_min()
+    #     t2 = time.time()
+    #
+    #     print(f'done. Results: (t = {t2 - t1};\t occurs: {abs(t - mi)})')
